@@ -3,7 +3,6 @@ import {
   ArrowDownRight,
   ArrowRight,
   Bell,
-  BookOpen,
   ChartNoAxesColumnIncreasing,
   ChevronDown,
   CircleHelp,
