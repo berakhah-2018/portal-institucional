@@ -30,6 +30,14 @@ El workflow `.github/workflows/pages.yml` publica automáticamente `frontend/` a
 
 GitHub Pages sirve archivos estáticos: no ejecuta Java/Spring, PostgreSQL, sesiones OAuth ni el adaptador de Drive. Sin un backend público HTTPS la web solo muestra la vista previa demo; no pongas secretos OAuth en variables `VITE_*`, porque se incorporan al JavaScript público. Publicar desde un repo privado requiere un plan de GitHub que incluya Pages privado; cambiar a público hará visible todo el código.
 
+## Desplegar el backend
+
+El `Dockerfile` de la raíz está preparado para Render u otro host compatible con contenedores. Crea un servicio Web desde el repo usando Dockerfile y una base PostgreSQL administrada; el puerto se toma de `PORT`, y Flyway/Spring Session JDBC inicializan el esquema al iniciar. Configura en el host `SPRING_PROFILES_ACTIVE=google`, `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APP_AUTH_ROLE_MAPPINGS`, `APP_FRONTEND_URL=https://berakhah-2018.github.io/portal-institucional/`, `APP_CORS_ALLOWED_ORIGIN=https://berakhah-2018.github.io`, `SESSION_COOKIE_SECURE=true` y `SESSION_COOKIE_SAME_SITE=None`. No guardes los secretos en GitHub ni en variables `VITE_*`.
+
+Configura en Google Cloud como URI de redirección autorizada `https://TU-SERVICIO.onrender.com/login/oauth2/code/google`. En GitHub → Settings → Secrets and variables → Actions → Variables, define `VITE_API_BASE_URL=https://TU-SERVICIO.onrender.com`; vuelve a ejecutar el workflow de Pages. GitHub Pages y `onrender.com` son sitios distintos: `SameSite=None; Secure` habilita las cookies cross-site, pero bloqueadores de cookies de terceros pueden impedir sesiones. Para producción estable, usa un dominio propio en el mismo dominio registrable para web y API (por ejemplo `portal.ejemplo.com` y `api.ejemplo.com`).
+
+Antes de operar con datos reales, sustituye el adaptador de métricas demo por persistencia real y valida las políticas de privacidad/consentimiento de Google. El plan gratuito de un proveedor puede suspender servicios o tener límites; el despliegue no debe considerarse una base de datos de producción sin revisar sus copias de seguridad y retención.
+
 La interfaz incluye una vista previa con datos ficticios para ADMIN, EDITOR y LECTOR. Esa selección solo es visual y no otorga permisos. En producción, los roles deben asignarse y comprobarse exclusivamente en el backend. Los endpoints de negocio requieren sesión autenticada.
 
 ## Google OAuth y roles
